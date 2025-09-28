@@ -1,11 +1,27 @@
-from backend import UrlManagerClass, MediaObject
 from datetime import date
-import base64
+from pathlib import Path
+import json
 
-urls = [
-        'https://music.youtube.com/watch?v=bDlEN5tDMtg&si=dGAzSs3UshTsXD76'
-        ]
+from backend import MediaObject, download_audio, embed_metadata
 
-#url_manager = UrlManagerClass(urls)
-#url_manager.download_videos('dest')
-media_object = MediaObject(urls[0])
+with open('download.json') as f:
+    urls = json.load(f)
+
+for i in urls:
+    print(f'Downloading -> {i}')
+    media_object = MediaObject(i)
+
+    metadata = media_object.selected_metadata_object
+    if type(metadata.artist) is list:
+        artist = metadata.artist[0]
+    elif type(metadata.artist) is str:
+        artist = metadata.artist
+
+    media_object.media_file = Path('Music', artist, metadata.album, metadata.title)
+
+    url = media_object.source
+    path = media_object.media_file
+    new_path = download_audio(url,path)
+    embed_metadata(new_path,metadata)
+
+    print('Done')
