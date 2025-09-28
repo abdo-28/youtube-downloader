@@ -11,6 +11,6 @@ extremely scuffed at the moment
 
 ## To-do
 
-[] - add gui
-[] - use mutagen or eyed3 to embed metadata onto the files instead of yt_dlp's weird integration of ffmpeg
-[] - maybe learn how to fetch the video data off of youtube instead of relying on yt_dlp
+- [ ] - add gui
+- [ ] - use mutagen or eyed3 to embed metadata onto the files instead of yt_dlp's weird integration of ffmpeg
+- [ ] - maybe learn how to fetch the video data off of youtube instead of relying on yt_dlp
