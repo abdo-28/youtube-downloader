@@ -5,8 +5,7 @@ from urllib.request import urlopen
 
 from yt_dlp import YoutubeDL
 
-from .metadata import Metadata
-
+from backend import Metadata
 
 @dataclass
 class MediaObject:
@@ -24,17 +23,46 @@ class MediaObject:
         metadata = YoutubeDL({'quiet': True}).extract_info(url=self.source, download=False)
 
         thumbnail = urlopen(metadata['thumbnail']).read() 
-        cover_art = base64.b64encode(thumbnail)
+        cover_art = base64.b64encode(thumbnail) if type(thumbnail) is bytes else None
         
+        # album
+        for i in ('album', 'playlist'):
+            if i in metadata:
+                album=metadata[i]
+                break
+            else:
+                album=None
+#        if album is None: album='Singles' 
+
+        # artist
+        for i in ('artists', 'uploader'):
+            if i in metadata:
+                if i == 'artists':
+                    artist=metadata[i][0]
+                    break
+                else:
+                    artist=metadata[i]
+                    break
+            else:
+                artist=None
+#        if artist is None: artist='Unknown'
+
+        # date
+        date=None
+        for i in ('release_date', 'release_year', 'upload_date'):
+            if i in metadata:
+                date=metadata[i]
+                break
+
         metadata_object = Metadata(
             title=metadata['title'],
-            album=metadata['album'] or metadata['playlist'],
-            artist=metadata['artists'][0] or metadata['uploader'],
-            artists=metadata['artists'],
+            album=album,
+            artist=artist,
             comment=metadata['description'],
-            date=metadata['release_date'] or metadata['release_year'] or metadata['upload_date'],
+            date=date,
             cover_art=cover_art,
             )
+
         
         self.add_metadata_object(metadata_object)
 

@@ -1,24 +1,34 @@
 import base64
 from dataclasses import dataclass, field
-from datetime import date
+import datetime
 from io import BytesIO
 
 from PIL import Image
 
 @dataclass
 class Metadata:
-    title: str or tuple or list
-    album: str
-    artist: str
-    comment: str
-    date: str or int or datetime.date
-    cover_art: bytes = field(repr=False)
-    artists: list or tuple = field(default_factory=[])
+    title: str or None
+    album: str or None
+    artist: str or None
+    comment: str or None
+    date: str or int or datetime.date or None
+    cover_art: bytes = field(repr=False) or None
 
     def __post_init__(self):
-        self.cover_art = self.__cropping_image(self.cover_art)
-        self.cover_art = self.__converting_image(self.cover_art)
-        self.date = str(self.date)
+        if self.cover_art is not None:
+            self.cover_art = self.__cropping_image(self.cover_art)
+            self.cover_art = self.__converting_image(self.cover_art)
+
+        # processing date
+        if self.date is not None:
+            date = list(self.date) 
+
+            year = int(''.join(date[0:4]))
+
+            if len(date) > 4:
+                month, day = int(''.join(date[4:6])), int(''.join(date[6:8]))
+
+            self.date = str(datetime.date(year, month, day))
 
     def __cropping_image(self, file):
         '''
@@ -57,7 +67,7 @@ class Metadata:
         return base64.b64encode(converted_image.getbuffer())
 
     def get_decoded_cover_art(self):
-        return base64.b64decode(self.cover_art)
+        return base64.b64decode(self.cover_art) if self.cover_art is not None else None
 
     def get_cover_art_file(self):
-        return BytesIO(self.get_decoded_cover_art())
+        return BytesIO(self.get_decoded_cover_art()) if self.cover_art is not None else None
